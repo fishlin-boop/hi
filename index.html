@@ -180,6 +180,53 @@
             text-align: center;
         }
 
+        /* Friends Sidebar Widget on Homepage */
+        .home-layout {
+            display: flex;
+            gap: 25px;
+        }
+
+        .main-content {
+            flex-grow: 1;
+        }
+
+        .friends-sidebar {
+            width: 280px;
+            background: var(--panel-bg);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            height: fit-content;
+        }
+
+        .friend-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .friend-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .friend-avatar-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #333;
+            overflow: hidden;
+        }
+
+        .friend-avatar-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         /* 3D Game Canvas Overlay */
         #game-container {
             position: fixed;
@@ -242,9 +289,9 @@
             position: absolute;
             bottom: 20px;
             left: 20px;
-            width: 350px;
-            height: 200px;
-            background: rgba(0, 0, 0, 0.6);
+            width: 380px;
+            height: 220px;
+            background: rgba(0, 0, 0, 0.75);
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.2);
             display: flex;
@@ -308,23 +355,35 @@
 
     <div class="container">
         <div class="nav-tabs">
-            <button class="tab-btn active" onclick="switchTab('games')">Games</button>
+            <button class="tab-btn active" onclick="switchTab('games')">Home & Games</button>
             <button class="tab-btn" onclick="switchTab('avatar')">Avatar Shop & Outfits</button>
             <button class="tab-btn" onclick="switchTab('trade')">Bot Trade</button>
             <button class="tab-btn" onclick="switchTab('settings')">Settings & Profile</button>
         </div>
 
-        <!-- GAMES VIEW -->
+        <!-- HOME / GAMES VIEW WITH FRIENDS SIDEBAR -->
         <div id="tab-games" class="view-section active">
-            <h2>Featured Games</h2>
-            <div class="games-grid">
-                <div class="game-card">
-                    <img src="Screenshot 2026-09-10 140437.png" class="game-thumb" alt="Hunt and Slice 2">
-                    <div class="game-info">
-                        <div class="game-title">Hunt and Slice 2</div>
-                        <div class="game-author">By nikiibeanz</div>
-                        <p style="font-size: 12px; color: #888; margin-bottom: 10px;">Mil Base Map Style • Shoot the Hunter to win!</p>
-                        <button class="action-btn" onclick="launchGame()">Play Game</button>
+            <div class="home-layout">
+                <div class="main-content">
+                    <h2>Featured Games</h2>
+                    <div class="games-grid">
+                        <div class="game-card">
+                            <img src="Screenshot 2026-09-10 140437.png" class="game-thumb" alt="Hunt and Slice 2">
+                            <div class="game-info">
+                                <div class="game-title">Hunt and Slice 2</div>
+                                <div class="game-author">By nikiibeanz</div>
+                                <p style="font-size: 12px; color: #888; margin-bottom: 10px;">Lobby & Mil Base Map • Shoot the Hunter to win!</p>
+                                <button class="action-btn" onclick="launchGame()">Play Game</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Friends List Sidebar with Robux and Avatars -->
+                <div class="friends-sidebar">
+                    <h3 style="margin-top:0; font-size: 16px; border-bottom:1px solid #333; padding-bottom:8px;">Friends List Online</h3>
+                    <div id="friends-container">
+                        <!-- Injected via JS -->
                     </div>
                 </div>
             </div>
@@ -333,7 +392,7 @@
         <!-- AVATAR SHOP -->
         <div id="tab-avatar" class="view-section">
             <h2>Avatar Customization & Marketplace</h2>
-            <p>Pick default bodies, MM2 outfits, weapons, and emotes with your BrickBucks!</p>
+            <p>Pick default bodies, MM2 outfits, the rare Floral Gun Set, and emotes with your BrickBucks!</p>
             <div class="card">
                 <h3>Default Base Avatars</h3>
                 <div style="display: flex; gap: 20px; margin-bottom: 15px;">
@@ -359,7 +418,7 @@
         <!-- BOT TRADE -->
         <div id="tab-trade" class="view-section">
             <h2>Bot Trading Post</h2>
-            <p>Trade with automated bot developers when you need gear or rank items!</p>
+            <p>Trade with automated bot developers when you need gear or rare items like the Floral Gun Set!</p>
             <div class="card" id="trade-interface">
                 <div id="bot-list" style="display: flex; gap: 10px; flex-direction: column;"></div>
             </div>
@@ -401,7 +460,7 @@
         </div>
 
         <div class="game-hud">
-            <div><b>Map:</b> Mil Base (by nikiibeanz)</div>
+            <div><b>Map:</b> Lobby / Mil Base (by nikiibeanz)</div>
             <div><b>Objective:</b> Hunt the Hunter & Shoot!</div>
             <div id="ammo-display" style="color: #ffd700; margin-top: 5px;">Ammo: 10 / 10 (Click to Shoot)</div>
         </div>
@@ -409,7 +468,7 @@
         <div class="chat-box">
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-row">
-                <input type="text" id="chat-input" placeholder="Say something to bots..." onkeypress="handleChatInput(event)">
+                <input type="text" id="chat-input" placeholder="Say something to players & iPad kids..." onkeypress="handleChatInput(event)">
                 <button class="action-btn" onclick="sendPlayerChat()" style="padding: 6px 12px;">Send</button>
             </div>
         </div>
@@ -433,6 +492,35 @@
             playerData.brickBucks += 500;
             playerData.lastLogin = now;
             alert("Daily Login Bonus! You received 500 BrickBucks!");
+        }
+
+        // Friends mock list with random avatars & robux
+        const friendsList = [
+            { name: "StarHunter123", robux: 1500, avatar: "image_435eb3.png", status: "Online" },
+            { name: "Megatron_Roblox", robux: 420, avatar: "image_435fc6.png", status: "In Game" },
+            { name: "killswitch221090", robux: 12050, avatar: "image_435eb3.png", status: "Online" },
+            { name: "ZOOMEKING", robux: 8900, avatar: "image_435fc6.png", status: "In Lobby" }
+        ];
+
+        function initFriendsSidebar() {
+            const container = document.getElementById('friends-container');
+            container.innerHTML = '';
+            friendsList.forEach(f => {
+                container.innerHTML += `
+                    <div class="friend-row">
+                        <div class="friend-info">
+                            <div class="friend-avatar-circle">
+                                <img src="${f.avatar}" alt="avatar">
+                            </div>
+                            <div>
+                                <div style="font-size: 13px; font-weight: bold;">${f.name}</div>
+                                <div style="font-size: 11px; color: #ffd700;">🪙 ${f.robux} Robux</div>
+                            </div>
+                        </div>
+                        <span style="font-size: 10px; color: #4cd964;">● ${f.status}</span>
+                    </div>
+                `;
+            });
         }
 
         function saveGame() {
@@ -478,8 +566,9 @@
             alert(`Equipped ${type} default avatar!`);
         }
 
-        // --- Shop & Marketplace Items ---
+        // --- Shop & Marketplace Items (Including Rare Floral Gun Set) ---
         const shopItems = [
+            { name: "Floral Gun Set [RARE]", price: 3500, dev: "nikiibeanz" },
             { name: "Teal Dark Reaper Scythe", price: 450, dev: "nikiibeanz" },
             { name: "MM2 Outfits Bundle", price: 300, dev: "xX_NoobSlayer_Xx" },
             { name: "Gun & Knife Arsenal Pack", price: 800, dev: "GlitchLord99" },
@@ -539,14 +628,16 @@
             }
         }
 
-        // --- 3D Engine & Game ("Hunt and Slice 2" - Mil Base Map) ---
+        // --- 3D Engine & Game ("Hunt and Slice 2" Lobby & Map with Collision & Real Players/iPad Kids) ---
         let gameActive = false;
-        let scene, camera, renderer, playerMesh, hunterMesh;
-        let keys = { w: false, a: false, s: false, d: false, arrowup: false, arrowdown: false, arrowleft: false, arrowright: false, shift: false };
+        let scene, camera, renderer, playerMesh;
+        let keys = { w: false, a: false, s: false, d: false, shift: false };
         let shiftLock = false;
         let ammo = 10;
         let isEmoting = false;
         let emoteTimer = 0;
+        let colliders = []; // Solid structures for collision detection
+        let otherPlayers = []; // NPC players & iPad kids roaming around
 
         function launchGame() {
             document.getElementById('game-container').style.display = 'block';
@@ -564,66 +655,74 @@
         function init3D() {
             const canvas = document.getElementById('game-canvas');
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x87ceeb); // Sky blue background matching Mil Base style
+            
+            // Custom vibrant colored sky and clouds for lobby environment
+            scene.background = new THREE.Color(0x3498db); 
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
 
             // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
             scene.add(ambientLight);
-            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(20, 40, 20);
+            const dirLight = new THREE.DirectionalLight(0xfff8e7, 0.9);
+            dirLight.position.set(30, 50, 30);
             scene.add(dirLight);
 
-            // Mil Base Map Environment Generation
-            // Ground
+            // Add volumetric procedural clouds to the sky
+            const cloudMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.8 });
+            for (let i = 0; i < 15; i++) {
+                const cloudGeo = new THREE.SphereGeometry(Math.random() * 6 + 4, 8, 8);
+                const cloud = new THREE.Mesh(cloudGeo, cloudMat);
+                cloud.position.set((Math.random() - 0.5) * 150, Math.random() * 20 + 35, (Math.random() - 0.5) * 150);
+                scene.add(cloud);
+            }
+
+            colliders = [];
+
+            // Stone Pathway Ground
             const floorGeo = new THREE.PlaneGeometry(120, 120);
-            const floorMat = new THREE.MeshStandardMaterial({ color: 0x4a4a4a, roughness: 0.9 });
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x7c7c7c, roughness: 0.8 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             scene.add(floor);
 
-            // Military Base Base Structures (Grey concrete buildings & shipping containers)
-            const concreteMat = new THREE.MeshStandardMaterial({ color: 0x888888 });
-            const blueContainerMat = new THREE.MeshStandardMaterial({ color: 0x1e90ff });
-            const redContainerMat = new THREE.MeshStandardMaterial({ color: 0xff3b30 });
-            const greenContainerMat = new THREE.MeshStandardMaterial({ color: 0x228b22 });
+            // Built Lobby Infrastructure matching reference screenshot layout (Fountain, gazebo, brick buildings)
+            // Fountain Base Center
+            const fountainBaseGeo = new THREE.CylinderGeometry(6, 6, 2, 16);
+            const concreteMat = new THREE.MeshStandardMaterial({ color: 0x999999 });
+            const fountainBase = new THREE.Mesh(fountainBaseGeo, concreteMat);
+            fountainBase.position.set(0, 1, 0);
+            scene.add(fountainBase);
+            colliders.push(fountainBase);
 
-            // Main Building walls
-            const bldGeo = new THREE.BoxGeometry(20, 10, 5);
-            const building = new THREE.Mesh(bldGeo, concreteMat);
-            building.position.set(-25, 5, -20);
-            scene.add(building);
+            // Fountain Pillar & Trophy Statue
+            const fountainColGeo = new THREE.CylinderGeometry(1.5, 1.5, 4, 12);
+            const fountainCol = new THREE.Mesh(fountainColGeo, concreteMat);
+            fountainCol.position.set(0, 3, 0);
+            scene.add(fountainCol);
+            colliders.push(fountainCol);
 
-            // Shipping Containers stacked like map screenshots
-            const containerGeo = new THREE.BoxGeometry(8, 3, 3);
-            const c1 = new THREE.Mesh(containerGeo, blueContainerMat);
-            c1.position.set(10, 1.5, -10);
-            scene.add(c1);
+            // Trophy Statue on top
+            const trophyGeo = new THREE.BoxGeometry(1.2, 1.8, 1.2);
+            const goldMat = new THREE.MeshStandardMaterial({ color: 0xffd700, metalness: 0.8 });
+            const trophy = new THREE.Mesh(trophyGeo, goldMat);
+            trophy.position.set(0, 5.5, 0);
+            scene.add(trophy);
 
-            const c2 = new THREE.Mesh(containerGeo, redContainerMat);
-            c2.position.set(12, 4.5, -10);
-            c2.rotation.y = 0.3;
-            scene.add(c2);
+            // Brick Buildings framing the courtyard
+            const brickMat = new THREE.MeshStandardMaterial({ color: 0x8b4513 });
+            
+            const leftBuilding = new THREE.Mesh(new THREE.BoxGeometry(25, 25, 10), brickMat);
+            leftBuilding.position.set(-35, 12.5, -20);
+            scene.add(leftBuilding);
+            colliders.push(leftBuilding);
 
-            const c3 = new THREE.Mesh(containerGeo, greenContainerMat);
-            c3.position.set(4, 1.5, -12);
-            scene.add(c3);
-
-            // Tank obstacle from Mil Base thumbnail
-            const tankBodyGeo = new THREE.BoxGeometry(6, 2, 8);
-            const tankMat = new THREE.MeshStandardMaterial({ color: 0x555555 });
-            const tank = new THREE.Mesh(tankBodyGeo, tankMat);
-            tank.position.set(-5, 1, -5);
-            scene.add(tank);
-
-            const barrelGeo = new THREE.CylinderGeometry(0.5, 0.5, 6);
-            const barrel = new THREE.Mesh(barrelGeo, tankMat);
-            barrel.rotation.z = Math.PI / 2;
-            barrel.position.set(-5, 2.5, -2);
-            scene.add(barrel);
+            const rightBuilding = new THREE.Mesh(new THREE.BoxGeometry(25, 25, 10), brickMat);
+            rightBuilding.position.set(35, 12.5, -20);
+            scene.add(rightBuilding);
+            colliders.push(rightBuilding);
 
             // Player Avatar Model
             const playerGroup = new THREE.Group();
@@ -642,23 +741,28 @@
             playerGroup.add(head);
 
             playerMesh = playerGroup;
-            playerMesh.position.set(0, 0, 10);
+            playerMesh.position.set(0, 0, 12);
             scene.add(playerMesh);
 
-            // Target Hunter AI Bot
-            const hunterGroup = new THREE.Group();
-            const hTorso = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2, 0.8), new THREE.MeshStandardMaterial({ color: 0x222222 }));
-            hTorso.position.y = 2;
-            hunterGroup.add(hTorso);
-            const hHead = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0xffffff }));
-            hHead.position.y = 3.3;
-            hunterGroup.add(hHead);
-            
-            hunterMesh = hunterGroup;
-            hunterMesh.position.set(15, 0, -15);
-            scene.add(hunterMesh);
+            // Spawn other players and iPad kids roaming the lobby
+            otherPlayers = [];
+            const playerNames = ["Starlight_Pro", "FlowerFairy", "SteampunkSam", "IpadKid_99", "RobloxianPro2026", "GamerGirl_X"];
+            playerNames.forEach((name, index) => {
+                const group = new THREE.Group();
+                const t = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2, 0.8), new THREE.MeshStandardMaterial({ color: Math.random() * 0xffffff }));
+                t.position.y = 2;
+                group.add(t);
+                
+                const h = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0xffd700 }));
+                h.position.y = 3.3;
+                group.add(h);
 
-            camera.position.set(0, 6, 16);
+                group.position.set((Math.random() - 0.5) * 30, 0, (Math.random() - 0.5) * 20);
+                scene.add(group);
+                otherPlayers.push({ name: name, mesh: group, speedX: (Math.random() - 0.5) * 0.05, speedZ: (Math.random() - 0.5) * 0.05 });
+            });
+
+            camera.position.set(0, 6, 18);
             camera.lookAt(playerMesh.position);
 
             window.addEventListener('keydown', handleKeyDown);
@@ -699,22 +803,25 @@
             if (k === 'd' || e.code === 'ArrowRight') keys.d = false;
         }
 
+        function checkCollision(targetPos) {
+            // Check collision against solid structures (colliders)
+            for (let obj of colliders) {
+                const box = new THREE.Box3().setFromObject(obj);
+                // Expand box slightly for avatar bounding radius
+                box.expandByScalar(0.8);
+                if (box.containsPoint(targetPos)) {
+                    return true; // Collision detected, cannot walk through
+                }
+            }
+            return false;
+        }
+
         function handleMouseDown() {
             if (!gameActive) return;
             if (ammo > 0) {
                 ammo--;
                 document.getElementById('ammo-display').innerText = `Ammo: ${ammo} / 10 (Click to Shoot)`;
-                
-                // Shoot check distance to Hunter bot
-                const dist = playerMesh.position.distanceTo(hunterMesh.position);
-                if (dist < 15) {
-                    alert("Direct Hit! You shot the Hunter and won the round! +200 BrickBucks");
-                    playerData.brickBucks += 200;
-                    saveGame();
-                    // Respawn hunter elsewhere
-                    hunterMesh.position.set((Math.random() - 0.5) * 40, 0, (Math.random() - 0.5) * 40);
-                    ammo = 10;
-                }
+                alert("Fired shot in the lobby!");
             } else {
                 alert("Out of ammo! Reloading...");
                 ammo = 10;
@@ -724,7 +831,7 @@
 
         function triggerEmote(emoteName) {
             isEmoting = true;
-            emoteTimer = 60; // frames
+            emoteTimer = 60;
             alert(`Performing emote: ${emoteName}!`);
         }
 
@@ -733,10 +840,25 @@
             requestAnimationFrame(animateGame);
 
             const speed = 0.25;
-            if (keys.w) playerMesh.position.z -= speed;
-            if (keys.s) playerMesh.position.z += speed;
-            if (keys.a) playerMesh.position.x -= speed;
-            if (keys.d) playerMesh.position.x += speed;
+            let nextPos = playerMesh.position.clone();
+
+            if (keys.w) nextPos.z -= speed;
+            if (keys.s) nextPos.z += speed;
+            if (keys.a) nextPos.x -= speed;
+            if (keys.d) nextPos.x += speed;
+
+            // Apply movement only if no collision blocks the path
+            if (!checkCollision(nextPos)) {
+                playerMesh.position.copy(nextPos);
+            }
+
+            // Animate roaming other players & iPad kids
+            otherPlayers.forEach(p => {
+                p.mesh.position.x += p.speedX;
+                p.mesh.position.z += p.speedZ;
+                if (Math.abs(p.mesh.position.x) > 40) p.speedX *= -1;
+                if (Math.abs(p.mesh.position.z) > 40) p.speedZ *= -1;
+            });
 
             // Emote animation wiggle
             if (isEmoting) {
@@ -757,41 +879,46 @@
                 playerMesh.rotation.y = mouseX * -1;
             } else {
                 camera.position.x = playerMesh.position.x;
-                camera.position.z = playerMesh.position.z + 12;
+                camera.position.z = playerMesh.position.z + 14;
                 camera.position.y = 6;
                 camera.lookAt(playerMesh.position);
             }
 
-            // Bot Hunter AI wander logic
-            hunterMesh.position.x += Math.sin(Date.now() * 0.002) * 0.05;
-
             renderer.render(scene, camera);
         }
 
-        // --- AI Chat Simulation inside servers ---
-        const botResponses = [
-            "Watch out, the hunter has a gun in the Mil Base!",
-            "Anyone trading items or MM2 outfits?",
-            "Bro, nikiibeanz cooked with this military base map.",
-            "Hit the shiftlock button for smooth aiming!",
-            "GG, great shot!"
+        // --- Realistic Contextual Chat AI System ---
+        const contextualConversations = [
+            { sender: "PlayerA_Starlight", msg: "Who wants to team up for Hunt and Slice?" },
+            { sender: "PlayerB_FlowerFairy", msg: "Me! I just got the Floral Set, it's so rare!" },
+            { sender: "PlayerC_SteampunkSam", msg: "Nice! I need to earn more BrickBucks to trade for it." },
+            { sender: "PlayerD_IpadKid_Pro", msg: "GGWP everyone. Let's run another round!" },
+            { sender: "StarHunter123", msg: "Anyone selling reaper scythes?" },
+            { sender: "Megatron_Roblox", msg: "Check the bot trade tab, prices are crazy today." }
         ];
 
+        let chatIndex = 0;
         function initBotChatAI() {
             const chatBox = document.getElementById('chat-messages');
-            chatBox.innerHTML = `<div style="color: #00ffcc;">[System]: Connected to Hunt and Slice 2 server (Mil Base Map by nikiibeanz).</div>`;
+            chatBox.innerHTML = `<div style="color: #00ffcc;">[System]: Welcome to BrickBlox Lobby. Chat is live.</div>`;
             
+            // Seed initial conversation lines dynamically matching reference dialogue
+            contextualConversations.forEach((c, idx) => {
+                setTimeout(() => {
+                    if (gameActive) appendChat(c.sender, c.msg);
+                }, idx * 1200);
+            });
+
             window.botChatInterval = setInterval(() => {
                 if (!gameActive) return;
-                const randomBot = shopItems[Math.floor(Math.random() * shopItems.length)].dev;
-                const randomMsg = botResponses[Math.floor(Math.random() * botResponses.length)];
-                appendChat(randomBot, randomMsg);
-            }, 6000);
+                const activeCono = contextualConversations[Math.floor(Math.random() * contextualConversations.length)];
+                appendChat(activeCono.sender, activeCono.msg);
+            }, 7000);
         }
 
         function appendChat(sender, message) {
             const chatBox = document.getElementById('chat-messages');
-            chatBox.innerHTML += `<div><b>${sender}:</b> ${message}</div>`;
+            chatBox.innerHTML += `<div><b>[${sender}]:</b> ${message}</div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
         }
 
@@ -808,16 +935,18 @@
                 appendChat(playerData.displayName, val);
                 input.value = '';
                 
+                // Contextual smart response from lobby players / iPad kids
                 setTimeout(() => {
-                    const replyingBot = shopItems[Math.floor(Math.random() * shopItems.length)].dev;
-                    appendChat(replyingBot, `Totally agree, ${playerData.displayName}!`);
-                }, 1500);
+                    const randomResponder = ["IpadKid_99", "FlowerFairy", "SteampunkSam"][Math.floor(Math.random() * 3)];
+                    appendChat(randomResponder, `Haha yeah! ${val} fr`);
+                }, 1800);
             }
         }
 
         updateUI();
         initShop();
         initTrading();
+        initFriendsSidebar();
     </script>
 </body>
 </html>
