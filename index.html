@@ -91,7 +91,6 @@
             display: block;
         }
 
-        /* Profile & Customization */
         .card {
             background: var(--panel-bg);
             border-radius: 12px;
@@ -126,7 +125,6 @@
             opacity: 0.9;
         }
 
-        /* Games Grid */
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -168,7 +166,6 @@
             margin-bottom: 15px;
         }
 
-        /* Avatar & Marketplace */
         .shop-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -199,6 +196,10 @@
             width: 100%;
             height: 100%;
             display: block;
+            cursor: grab;
+        }
+        #game-canvas:active {
+            cursor: grabbing;
         }
 
         .game-ui-overlay {
@@ -206,11 +207,35 @@
             top: 20px;
             left: 20px;
             z-index: 1001;
+            display: flex;
+            gap: 10px;
+        }
+
+        .shiftlock-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid #555;
+            padding: 8px 15px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            z-index: 1001;
             pointer-events: none;
         }
 
-        .game-ui-overlay > * {
-            pointer-events: auto;
+        .game-hud {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            z-index: 1001;
+            color: white;
+            text-align: right;
         }
 
         .chat-box {
@@ -258,6 +283,15 @@
             font-weight: bold;
             cursor: pointer;
         }
+        
+        .emote-menu {
+            position: absolute;
+            top: 70px;
+            left: 20px;
+            display: flex;
+            gap: 5px;
+            z-index: 1001;
+        }
     </style>
     <!-- Three.js for 3D engine -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -275,7 +309,7 @@
     <div class="container">
         <div class="nav-tabs">
             <button class="tab-btn active" onclick="switchTab('games')">Games</button>
-            <button class="tab-btn" onclick="switchTab('avatar')">Avatar Shop</button>
+            <button class="tab-btn" onclick="switchTab('avatar')">Avatar Shop & Outfits</button>
             <button class="tab-btn" onclick="switchTab('trade')">Bot Trade</button>
             <button class="tab-btn" onclick="switchTab('settings')">Settings & Profile</button>
         </div>
@@ -285,10 +319,11 @@
             <h2>Featured Games</h2>
             <div class="games-grid">
                 <div class="game-card">
-                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='160' viewBox='0 0 300 160'><rect width='300' height='160' fill='%231e90ff'/><text x='20' y='60' font-size='24' font-family='sans-serif' font-weight='bold' fill='%23ffffff'>hunt And Slice</text><text x='20' y='90' font-size='24' font-family='sans-serif' font-weight='bold' fill='%23ffffff'>2</text><rect x='180' y='50' width='40' height='40' fill='%23a0a0a0'/><rect x='210' y='80' width='40' height='40' fill='%23808080'/><rect x='150' y='80' width='40' height='40' fill='%23606060'/></svg>" class="game-thumb" alt="Hunt and Slice 2">
+                    <img src="Screenshot 2026-09-10 140437.png" class="game-thumb" alt="Hunt and Slice 2">
                     <div class="game-info">
                         <div class="game-title">Hunt and Slice 2</div>
                         <div class="game-author">By nikiibeanz</div>
+                        <p style="font-size: 12px; color: #888; margin-bottom: 10px;">Mil Base Map Style • Shoot the Hunter to win!</p>
                         <button class="action-btn" onclick="launchGame()">Play Game</button>
                     </div>
                 </div>
@@ -297,8 +332,25 @@
 
         <!-- AVATAR SHOP -->
         <div id="tab-avatar" class="view-section">
-            <h2>Avatar & Marketplace</h2>
-            <p>Fake developers are dropping items daily! Grab your gear.</p>
+            <h2>Avatar Customization & Marketplace</h2>
+            <p>Pick default bodies, MM2 outfits, weapons, and emotes with your BrickBucks!</p>
+            <div class="card">
+                <h3>Default Base Avatars</h3>
+                <div style="display: flex; gap: 20px; margin-bottom: 15px;">
+                    <div>
+                        <img src="image_435eb3.png" style="width: 100px; height: 100px; object-fit: contain; background:#222; border-radius:8px;">
+                        <p style="text-align:center; font-size:13px;">Default Male</p>
+                        <button class="action-btn" style="width:100%; padding:5px;" onclick="setAvatar('male')">Equip</button>
+                    </div>
+                    <div>
+                        <img src="image_435fc6.png" style="width: 100px; height: 100px; object-fit: contain; background:#222; border-radius:8px;">
+                        <p style="text-align:center; font-size:13px;">Default Female</p>
+                        <button class="action-btn" style="width:100%; padding:5px;" onclick="setAvatar('female')">Equip</button>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>Shop Items & Gear</h3>
             <div class="shop-grid" id="shop-items-container">
                 <!-- Injected via JS -->
             </div>
@@ -307,9 +359,8 @@
         <!-- BOT TRADE -->
         <div id="tab-trade" class="view-section">
             <h2>Bot Trading Post</h2>
-            <p>Out of BrickBucks? Trade items or currency with automated bot developers!</p>
+            <p>Trade with automated bot developers when you need gear or rank items!</p>
             <div class="card" id="trade-interface">
-                <p>Select a bot trader to negotiate with:</p>
                 <div id="bot-list" style="display: flex; gap: 10px; flex-direction: column;"></div>
             </div>
         </div>
@@ -341,6 +392,20 @@
         <div class="game-ui-overlay">
             <button class="exit-game-btn" onclick="exitGame()">Leave Game</button>
         </div>
+        <div class="shiftlock-indicator" id="shiftlock-status">ShiftLock: OFF (Press 'SHIFT' to toggle)</div>
+        
+        <div class="emote-menu">
+            <button class="action-btn" onclick="triggerEmote('Dance')">💃 Dance</button>
+            <button class="action-btn" onclick="triggerEmote('Flex')">💪 Flex</button>
+            <button class="action-btn" onclick="triggerEmote('Wave')">👋 Wave</button>
+        </div>
+
+        <div class="game-hud">
+            <div><b>Map:</b> Mil Base (by nikiibeanz)</div>
+            <div><b>Objective:</b> Hunt the Hunter & Shoot!</div>
+            <div id="ammo-display" style="color: #ffd700; margin-top: 5px;">Ammo: 10 / 10 (Click to Shoot)</div>
+        </div>
+
         <div class="chat-box">
             <div class="chat-messages" id="chat-messages"></div>
             <div class="chat-input-row">
@@ -358,14 +423,14 @@
             displayName: 'CoolBuilder',
             brickBucks: 5000,
             inventory: [],
+            equippedAvatar: 'male',
             theme: '#121212',
             lastLogin: 0
         };
 
-        // Daily login reward check
         const now = Date.now();
         if (now - playerData.lastLogin > 86400000) {
-            playerData.brickBucks += 500; // Daily bonus
+            playerData.brickBucks += 500;
             playerData.lastLogin = now;
             alert("Daily Login Bonus! You received 500 BrickBucks!");
         }
@@ -407,23 +472,30 @@
             }
         }
 
-        // --- Fake Developers & Marketplace Data ---
-        const fakeDevs = [
-            { name: "xX_NoobSlayer_Xx", item: "Neon Sword", price: 300 },
-            { name: "GlitchLord99", item: "Cyber Shades", price: 150 },
-            { name: "BrickMaster_Bot", item: "Golden Fedora", price: 1200 },
-            { name: "nikiibeanz", item: "Slice Dagger", price: 450 }
+        function setAvatar(type) {
+            playerData.equippedAvatar = type;
+            saveGame();
+            alert(`Equipped ${type} default avatar!`);
+        }
+
+        // --- Shop & Marketplace Items ---
+        const shopItems = [
+            { name: "Teal Dark Reaper Scythe", price: 450, dev: "nikiibeanz" },
+            { name: "MM2 Outfits Bundle", price: 300, dev: "xX_NoobSlayer_Xx" },
+            { name: "Gun & Knife Arsenal Pack", price: 800, dev: "GlitchLord99" },
+            { name: "Rank: Unreachable Overlord", price: 2500, dev: "BrickMaster_Bot" },
+            { name: "Emote Pack: Dance & Flex", price: 150, dev: "nikiibeanz" }
         ];
 
         function initShop() {
             const container = document.getElementById('shop-items-container');
             container.innerHTML = '';
-            fakeDevs.forEach((dev, idx) => {
+            shopItems.forEach((item, idx) => {
                 container.innerHTML += `
                     <div class="shop-item">
-                        <h4>${dev.item}</h4>
-                        <p style="font-size:12px; color:#aaa;">By ${dev.name}</p>
-                        <p style="color:#ffd700; font-weight:bold;">🧱 ${dev.price}</p>
+                        <h4>${item.name}</h4>
+                        <p style="font-size:12px; color:#aaa;">By ${item.dev}</p>
+                        <p style="color:#ffd700; font-weight:bold;">🧱 ${item.price}</p>
                         <button class="action-btn" onclick="buyItem(${idx})">Buy Item</button>
                     </div>
                 `;
@@ -431,12 +503,12 @@
         }
 
         function buyItem(idx) {
-            let item = fakeDevs[idx];
+            let item = shopItems[idx];
             if (playerData.brickBucks >= item.price) {
                 playerData.brickBucks -= item.price;
-                playerData.inventory.push(item.item);
+                playerData.inventory.push(item.name);
                 saveGame();
-                alert(`Successfully bought ${item.item}!`);
+                alert(`Successfully bought ${item.name}!`);
             } else {
                 alert("Not enough BrickBucks!");
             }
@@ -446,32 +518,35 @@
         function initTrading() {
             const botList = document.getElementById('bot-list');
             botList.innerHTML = '';
-            fakeDevs.forEach(dev => {
+            shopItems.forEach(item => {
                 botList.innerHTML += `
                     <div class="card" style="margin:0; padding:10px; display:flex; justify-content:space-between; align-items:center;">
-                        <span>Bot Developer: <b>${dev.name}</b> wants to trade items.</span>
-                        <button class="action-btn" onclick="tradeWithBot('${dev.name}', '${dev.item}')">Trade 200 BB for ${dev.item}</button>
+                        <span>Bot <b>${item.dev}</b> offers: <b>${item.name}</b></span>
+                        <button class="action-btn" onclick="tradeWithBot('${item.dev}', '${item.name}', ${item.price})">Trade for ${item.price} BB</button>
                     </div>
                 `;
             });
         }
 
-        function tradeWithBot(botName, itemName) {
-            if (playerData.brickBucks >= 200) {
-                playerData.brickBucks -= 200;
+        function tradeWithBot(botName, itemName, price) {
+            if (playerData.brickBucks >= price) {
+                playerData.brickBucks -= price;
                 playerData.inventory.push(itemName);
                 saveGame();
-                alert(`Bot ${botName} accepted the trade! You received ${itemName}.`);
+                alert(`Trade successful with ${botName}! You got ${itemName}.`);
             } else {
-                alert("You need at least 200 BrickBucks to make this trade with the bot.");
+                alert("Not enough BrickBucks for this trade!");
             }
         }
 
-        // --- 3D Engine & Game ("Hunt and Slice 2" by nikiibeanz) ---
+        // --- 3D Engine & Game ("Hunt and Slice 2" - Mil Base Map) ---
         let gameActive = false;
-        let scene, camera, renderer, playerMesh;
-        let keys = { w: false, a: false, s: false, d: false, arrowup: false, arrowdown: false, arrowleft: false, arrowright: false };
-        let botAIList = [];
+        let scene, camera, renderer, playerMesh, hunterMesh;
+        let keys = { w: false, a: false, s: false, d: false, arrowup: false, arrowdown: false, arrowleft: false, arrowright: false, shift: false };
+        let shiftLock = false;
+        let ammo = 10;
+        let isEmoting = false;
+        let emoteTimer = 0;
 
         function launchGame() {
             document.getElementById('game-container').style.display = 'block';
@@ -489,52 +564,117 @@
         function init3D() {
             const canvas = document.getElementById('game-canvas');
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x1a1a2e);
+            scene.background = new THREE.Color(0x87ceeb); // Sky blue background matching Mil Base style
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
 
             // Lighting
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
             scene.add(ambientLight);
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            dirLight.position.set(10, 20, 10);
+            dirLight.position.set(20, 40, 20);
             scene.add(dirLight);
 
-            // Map Creation for "Hunt and Slice 2" (Designed by nikiibeanz)
-            // Floor
-            const floorGeo = new THREE.PlaneGeometry(100, 100);
-            const floorMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+            // Mil Base Map Environment Generation
+            // Ground
+            const floorGeo = new THREE.PlaneGeometry(120, 120);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x4a4a4a, roughness: 0.9 });
             const floor = new THREE.Mesh(floorGeo, floorMat);
             floor.rotation.x = -Math.PI / 2;
             scene.add(floor);
 
-            // Obstacle Blocks (MM2 Style layout)
-            const boxGeo = new THREE.BoxGeometry(4, 4, 4);
-            const boxMat = new THREE.MeshStandardMaterial({ color: 0x5555ff });
-            for (let i = 0; i < 15; i++) {
-                const obstacle = new THREE.Mesh(boxGeo, boxMat);
-                obstacle.position.x = (Math.random() - 0.5) * 60;
-                obstacle.position.y = 2;
-                obstacle.position.z = (Math.random() - 0.5) * 60;
-                scene.add(obstacle);
-            }
+            // Military Base Base Structures (Grey concrete buildings & shipping containers)
+            const concreteMat = new THREE.MeshStandardMaterial({ color: 0x888888 });
+            const blueContainerMat = new THREE.MeshStandardMaterial({ color: 0x1e90ff });
+            const redContainerMat = new THREE.MeshStandardMaterial({ color: 0xff3b30 });
+            const greenContainerMat = new THREE.MeshStandardMaterial({ color: 0x228b22 });
 
-            // Player Avatar block
-            const playerGeo = new THREE.BoxGeometry(2, 3, 1);
-            const playerMat = new THREE.MeshStandardMaterial({ color: 0xff3333 });
-            playerMesh = new THREE.Mesh(playerGeo, playerMat);
-            playerMesh.position.y = 1.5;
+            // Main Building walls
+            const bldGeo = new THREE.BoxGeometry(20, 10, 5);
+            const building = new THREE.Mesh(bldGeo, concreteMat);
+            building.position.set(-25, 5, -20);
+            scene.add(building);
+
+            // Shipping Containers stacked like map screenshots
+            const containerGeo = new THREE.BoxGeometry(8, 3, 3);
+            const c1 = new THREE.Mesh(containerGeo, blueContainerMat);
+            c1.position.set(10, 1.5, -10);
+            scene.add(c1);
+
+            const c2 = new THREE.Mesh(containerGeo, redContainerMat);
+            c2.position.set(12, 4.5, -10);
+            c2.rotation.y = 0.3;
+            scene.add(c2);
+
+            const c3 = new THREE.Mesh(containerGeo, greenContainerMat);
+            c3.position.set(4, 1.5, -12);
+            scene.add(c3);
+
+            // Tank obstacle from Mil Base thumbnail
+            const tankBodyGeo = new THREE.BoxGeometry(6, 2, 8);
+            const tankMat = new THREE.MeshStandardMaterial({ color: 0x555555 });
+            const tank = new THREE.Mesh(tankBodyGeo, tankMat);
+            tank.position.set(-5, 1, -5);
+            scene.add(tank);
+
+            const barrelGeo = new THREE.CylinderGeometry(0.5, 0.5, 6);
+            const barrel = new THREE.Mesh(barrelGeo, tankMat);
+            barrel.rotation.z = Math.PI / 2;
+            barrel.position.set(-5, 2.5, -2);
+            scene.add(barrel);
+
+            // Player Avatar Model
+            const playerGroup = new THREE.Group();
+            const bodyColor = playerData.equippedAvatar === 'female' ? 0xff69b4 : 0x007aff;
+            
+            const torsoGeo = new THREE.BoxGeometry(1.6, 2, 0.8);
+            const torsoMat = new THREE.MeshStandardMaterial({ color: bodyColor });
+            const torso = new THREE.Mesh(torsoGeo, torsoMat);
+            torso.position.y = 2;
+            playerGroup.add(torso);
+
+            const headGeo = new THREE.BoxGeometry(1, 1, 1);
+            const headMat = new THREE.MeshStandardMaterial({ color: 0xffd700 });
+            const head = new THREE.Mesh(headGeo, headMat);
+            head.position.y = 3.3;
+            playerGroup.add(head);
+
+            playerMesh = playerGroup;
+            playerMesh.position.set(0, 0, 10);
             scene.add(playerMesh);
 
-            camera.position.set(0, 8, 12);
+            // Target Hunter AI Bot
+            const hunterGroup = new THREE.Group();
+            const hTorso = new THREE.Mesh(new THREE.BoxGeometry(1.6, 2, 0.8), new THREE.MeshStandardMaterial({ color: 0x222222 }));
+            hTorso.position.y = 2;
+            hunterGroup.add(hTorso);
+            const hHead = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ color: 0xffffff }));
+            hHead.position.y = 3.3;
+            hunterGroup.add(hHead);
+            
+            hunterMesh = hunterGroup;
+            hunterMesh.position.set(15, 0, -15);
+            scene.add(hunterMesh);
+
+            camera.position.set(0, 6, 16);
             camera.lookAt(playerMesh.position);
 
             window.addEventListener('keydown', handleKeyDown);
             window.addEventListener('keyup', handleKeyUp);
+            window.addEventListener('mousedown', handleMouseDown);
+            window.addEventListener('mousemove', handleMouseMove);
 
             animateGame();
+        }
+
+        let mouseX = 0;
+        let mouseY = 0;
+        function handleMouseMove(e) {
+            if (!gameActive) return;
+            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
+            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
         }
 
         function handleKeyDown(e) {
@@ -544,6 +684,10 @@
             if (k === 's' || e.code === 'ArrowDown') keys.s = true;
             if (k === 'a' || e.code === 'ArrowLeft') keys.a = true;
             if (k === 'd' || e.code === 'ArrowRight') keys.d = true;
+            if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
+                shiftLock = !shiftLock;
+                document.getElementById('shiftlock-status').innerText = `ShiftLock: ${shiftLock ? 'ON' : 'OFF'} (Press 'SHIFT' to toggle)`;
+            }
         }
 
         function handleKeyUp(e) {
@@ -555,42 +699,91 @@
             if (k === 'd' || e.code === 'ArrowRight') keys.d = false;
         }
 
+        function handleMouseDown() {
+            if (!gameActive) return;
+            if (ammo > 0) {
+                ammo--;
+                document.getElementById('ammo-display').innerText = `Ammo: ${ammo} / 10 (Click to Shoot)`;
+                
+                // Shoot check distance to Hunter bot
+                const dist = playerMesh.position.distanceTo(hunterMesh.position);
+                if (dist < 15) {
+                    alert("Direct Hit! You shot the Hunter and won the round! +200 BrickBucks");
+                    playerData.brickBucks += 200;
+                    saveGame();
+                    // Respawn hunter elsewhere
+                    hunterMesh.position.set((Math.random() - 0.5) * 40, 0, (Math.random() - 0.5) * 40);
+                    ammo = 10;
+                }
+            } else {
+                alert("Out of ammo! Reloading...");
+                ammo = 10;
+                document.getElementById('ammo-display').innerText = `Ammo: ${ammo} / 10 (Click to Shoot)`;
+            }
+        }
+
+        function triggerEmote(emoteName) {
+            isEmoting = true;
+            emoteTimer = 60; // frames
+            alert(`Performing emote: ${emoteName}!`);
+        }
+
         function animateGame() {
             if (!gameActive) return;
             requestAnimationFrame(animateGame);
 
-            // Movement handling via WASD / Arrow Keys
-            const speed = 0.2;
+            const speed = 0.25;
             if (keys.w) playerMesh.position.z -= speed;
             if (keys.s) playerMesh.position.z += speed;
             if (keys.a) playerMesh.position.x -= speed;
             if (keys.d) playerMesh.position.x += speed;
 
-            // Camera follow
-            camera.position.x = playerMesh.position.x;
-            camera.position.z = playerMesh.position.z + 10;
-            camera.lookAt(playerMesh.position);
+            // Emote animation wiggle
+            if (isEmoting) {
+                playerMesh.rotation.y += 0.2;
+                emoteTimer--;
+                if (emoteTimer <= 0) {
+                    isEmoting = false;
+                    playerMesh.rotation.y = 0;
+                }
+            }
+
+            // ShiftLock camera behavior
+            if (shiftLock) {
+                camera.position.x = playerMesh.position.x + mouseX * 5;
+                camera.position.y = playerMesh.position.y + 3 + mouseY * 3;
+                camera.position.z = playerMesh.position.z + 5;
+                camera.lookAt(playerMesh.position);
+                playerMesh.rotation.y = mouseX * -1;
+            } else {
+                camera.position.x = playerMesh.position.x;
+                camera.position.z = playerMesh.position.z + 12;
+                camera.position.y = 6;
+                camera.lookAt(playerMesh.position);
+            }
+
+            // Bot Hunter AI wander logic
+            hunterMesh.position.x += Math.sin(Date.now() * 0.002) * 0.05;
 
             renderer.render(scene, camera);
         }
 
         // --- AI Chat Simulation inside servers ---
         const botResponses = [
-            "Anyone trading items?",
-            "Bro, nikiibeanz cooked with this map update!",
-            "Hide and seek starting in the main arena soon.",
-            "Watch out, the murderer is roaming around!",
-            "GG everyone, nice round."
+            "Watch out, the hunter has a gun in the Mil Base!",
+            "Anyone trading items or MM2 outfits?",
+            "Bro, nikiibeanz cooked with this military base map.",
+            "Hit the shiftlock button for smooth aiming!",
+            "GG, great shot!"
         ];
 
         function initBotChatAI() {
             const chatBox = document.getElementById('chat-messages');
-            chatBox.innerHTML = `<div style="color: #00ffcc;">[System]: Connected to Hunt and Slice 2 server (Map by nikiibeanz).</div>`;
+            chatBox.innerHTML = `<div style="color: #00ffcc;">[System]: Connected to Hunt and Slice 2 server (Mil Base Map by nikiibeanz).</div>`;
             
-            // Periodic AI bot dialogue injection
             window.botChatInterval = setInterval(() => {
                 if (!gameActive) return;
-                const randomBot = fakeDevs[Math.floor(Math.random() * fakeDevs.length)].name;
+                const randomBot = shopItems[Math.floor(Math.random() * shopItems.length)].dev;
                 const randomMsg = botResponses[Math.floor(Math.random() * botResponses.length)];
                 appendChat(randomBot, randomMsg);
             }, 6000);
@@ -615,15 +808,13 @@
                 appendChat(playerData.displayName, val);
                 input.value = '';
                 
-                // Simulate basic automated AI conversational reply
                 setTimeout(() => {
-                    const replyingBot = fakeDevs[Math.floor(Math.random() * fakeDevs.length)].name;
-                    appendChat(replyingBot, `Haha yeah, totally agree ${playerData.displayName}!`);
+                    const replyingBot = shopItems[Math.floor(Math.random() * shopItems.length)].dev;
+                    appendChat(replyingBot, `Totally agree, ${playerData.displayName}!`);
                 }, 1500);
             }
         }
 
-        // Initialize App states on load
         updateUI();
         initShop();
         initTrading();
