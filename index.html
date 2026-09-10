@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrickBlox</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --accent-color: #ff3b30;
+            --panel-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --secondary-text: #b0b0b0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            transition: background-color 0.3s ease;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: var(--panel-bg);
+            border-bottom: 2px solid #333;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+
+        .user-stats {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .currency-badge {
+            background: #2a2a2a;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #ffd700;
+            border: 1px solid #444;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: #222;
+            border: none;
+            color: var(--text-color);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .tab-btn:hover, .tab-btn.active {
+            background: var(--accent-color);
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        /* Profile & Customization */
+        .card {
+            background: var(--panel-bg);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+
+        input[type="text"], input[type="number"] {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: white;
+            padding: 10px;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 300px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        button.action-btn {
+            background: #007aff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button.action-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Games Grid */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .game-card {
+            background: var(--panel-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #333;
+            transition: transform 0.2s;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .game-thumb {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            background: #333;
+        }
+
+        .game-info {
+            padding: 15px;
+        }
+
+        .game-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .game-author {
+            color: var(--secondary-text);
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        /* Avatar & Marketplace */
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .shop-item {
+            background: var(--panel-bg);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        /* 3D Game Canvas Overlay */
+        #game-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            display: none;
+            z-index: 1000;
+        }
+
+        #game-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .game-ui-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            pointer-events: none;
+        }
+
+        .game-ui-overlay > * {
+            pointer-events: auto;
+        }
+
+        .chat-box {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 350px;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            z-index: 1001;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            font-size: 13px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 5px;
+        }
+
+        .chat-input-row input {
+            margin: 0;
+            flex-grow: 1;
+            padding: 6px;
+        }
+
+        .exit-game-btn {
+            background: #ff3b30;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+    <!-- Three.js for 3D engine -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <header>
+        <div class="logo">BRICKBLOX</div>
+        <div class="user-stats">
+            <div class="currency-badge" id="currency-display">🧱 5000 BrickBucks</div>
+            <div id="user-display-tag" style="font-weight: 600;">Player</div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('games')">Games</button>
+            <button class="tab-btn" onclick="switchTab('avatar')">Avatar Shop</button>
+            <button class="tab-btn" onclick="switchTab('trade')">Bot Trade</button>
+            <button class="tab-btn" onclick="switchTab('settings')">Settings & Profile</button>
+        </div>
+
+        <!-- GAMES VIEW -->
+        <div id="tab-games" class="view-section active">
+            <h2>Featured Games</h2>
+            <div class="games-grid">
+                <div class="game-card">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='160' viewBox='0 0 300 160'><rect width='300' height='160' fill='%231e90ff'/><text x='20' y='60' font-size='24' font-family='sans-serif' font-weight='bold' fill='%23ffffff'>hunt And Slice</text><text x='20' y='90' font-size='24' font-family='sans-serif' font-weight='bold' fill='%23ffffff'>2</text><rect x='180' y='50' width='40' height='40' fill='%23a0a0a0'/><rect x='210' y='80' width='40' height='40' fill='%23808080'/><rect x='150' y='80' width='40' height='40' fill='%23606060'/></svg>" class="game-thumb" alt="Hunt and Slice 2">
+                    <div class="game-info">
+                        <div class="game-title">Hunt and Slice 2</div>
+                        <div class="game-author">By nikiibeanz</div>
+                        <button class="action-btn" onclick="launchGame()">Play Game</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AVATAR SHOP -->
+        <div id="tab-avatar" class="view-section">
+            <h2>Avatar & Marketplace</h2>
+            <p>Fake developers are dropping items daily! Grab your gear.</p>
+            <div class="shop-grid" id="shop-items-container">
+                <!-- Injected via JS -->
+            </div>
+        </div>
+
+        <!-- BOT TRADE -->
+        <div id="tab-trade" class="view-section">
+            <h2>Bot Trading Post</h2>
+            <p>Out of BrickBucks? Trade items or currency with automated bot developers!</p>
+            <div class="card" id="trade-interface">
+                <p>Select a bot trader to negotiate with:</p>
+                <div id="bot-list" style="display: flex; gap: 10px; flex-direction: column;"></div>
+            </div>
+        </div>
+
+        <!-- SETTINGS & PROFILE -->
+        <div id="tab-settings" class="view-section">
+            <h2>Account Settings</h2>
+            <div class="card">
+                <h3>Profile Customization</h3>
+                <label>Username (Immutable ID):</label><br>
+                <input type="text" id="input-username" readonly><br>
+                
+                <label>Display Name:</label><br>
+                <input type="text" id="input-displayname"><br>
+                <button class="action-btn" onclick="saveProfile()">Save Profile</button>
+            </div>
+
+            <div class="card">
+                <h3>Theme Customization</h3>
+                <p>Change background theme color using BrickBucks (Costs 100 BrickBucks)</p>
+                <input type="color" id="color-picker" value="#121212">
+                <button class="action-btn" onclick="changeTheme()">Apply Theme</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D GAMEPLAY VIEW CONTAINER -->
+    <div id="game-container">
+        <div class="game-ui-overlay">
+            <button class="exit-game-btn" onclick="exitGame()">Leave Game</button>
+        </div>
+        <div class="chat-box">
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-row">
+                <input type="text" id="chat-input" placeholder="Say something to bots..." onkeypress="handleChatInput(event)">
+                <button class="action-btn" onclick="sendPlayerChat()" style="padding: 6px 12px;">Send</button>
+            </div>
+        </div>
+        <canvas id="game-canvas"></canvas>
+    </div>
+
+    <script>
+        // --- Persistent LocalStorage Account Setup ---
+        let playerData = JSON.parse(localStorage.getItem('brickblox_save')) || {
+            username: 'User_' + Math.floor(Math.random() * 90000 + 10000),
+            displayName: 'CoolBuilder',
+            brickBucks: 5000,
+            inventory: [],
+            theme: '#121212',
+            lastLogin: 0
+        };
+
+        // Daily login reward check
+        const now = Date.now();
+        if (now - playerData.lastLogin > 86400000) {
+            playerData.brickBucks += 500; // Daily bonus
+            playerData.lastLogin = now;
+            alert("Daily Login Bonus! You received 500 BrickBucks!");
+        }
+
+        function saveGame() {
+            localStorage.setItem('brickblox_save', JSON.stringify(playerData));
+            updateUI();
+        }
+
+        function updateUI() {
+            document.getElementById('currency-display').innerText = `🧱 ${playerData.brickBucks} BrickBucks`;
+            document.getElementById('user-display-tag').innerText = playerData.displayName;
+            document.getElementById('input-username').value = playerData.username;
+            document.getElementById('input-displayname').value = playerData.displayName;
+            document.documentElement.style.setProperty('--bg-color', playerData.theme);
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-' + tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function saveProfile() {
+            playerData.displayName = document.getElementById('input-displayname').value;
+            saveGame();
+            alert("Profile updated safely!");
+        }
+
+        function changeTheme() {
+            if (playerData.brickBucks >= 100) {
+                playerData.brickBucks -= 100;
+                playerData.theme = document.getElementById('color-picker').value;
+                saveGame();
+                alert("Theme updated!");
+            } else {
+                alert("Not enough BrickBucks!");
+            }
+        }
+
+        // --- Fake Developers & Marketplace Data ---
+        const fakeDevs = [
+            { name: "xX_NoobSlayer_Xx", item: "Neon Sword", price: 300 },
+            { name: "GlitchLord99", item: "Cyber Shades", price: 150 },
+            { name: "BrickMaster_Bot", item: "Golden Fedora", price: 1200 },
+            { name: "nikiibeanz", item: "Slice Dagger", price: 450 }
+        ];
+
+        function initShop() {
+            const container = document.getElementById('shop-items-container');
+            container.innerHTML = '';
+            fakeDevs.forEach((dev, idx) => {
+                container.innerHTML += `
+                    <div class="shop-item">
+                        <h4>${dev.item}</h4>
+                        <p style="font-size:12px; color:#aaa;">By ${dev.name}</p>
+                        <p style="color:#ffd700; font-weight:bold;">🧱 ${dev.price}</p>
+                        <button class="action-btn" onclick="buyItem(${idx})">Buy Item</button>
+                    </div>
+                `;
+            });
+        }
+
+        function buyItem(idx) {
+            let item = fakeDevs[idx];
+            if (playerData.brickBucks >= item.price) {
+                playerData.brickBucks -= item.price;
+                playerData.inventory.push(item.item);
+                saveGame();
+                alert(`Successfully bought ${item.item}!`);
+            } else {
+                alert("Not enough BrickBucks!");
+            }
+        }
+
+        // --- Bot Trading System ---
+        function initTrading() {
+            const botList = document.getElementById('bot-list');
+            botList.innerHTML = '';
+            fakeDevs.forEach(dev => {
+                botList.innerHTML += `
+                    <div class="card" style="margin:0; padding:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>Bot Developer: <b>${dev.name}</b> wants to trade items.</span>
+                        <button class="action-btn" onclick="tradeWithBot('${dev.name}', '${dev.item}')">Trade 200 BB for ${dev.item}</button>
+                    </div>
+                `;
+            });
+        }
+
+        function tradeWithBot(botName, itemName) {
+            if (playerData.brickBucks >= 200) {
+                playerData.brickBucks -= 200;
+                playerData.inventory.push(itemName);
+                saveGame();
+                alert(`Bot ${botName} accepted the trade! You received ${itemName}.`);
+            } else {
+                alert("You need at least 200 BrickBucks to make this trade with the bot.");
+            }
+        }
+
+        // --- 3D Engine & Game ("Hunt and Slice 2" by nikiibeanz) ---
+        let gameActive = false;
+        let scene, camera, renderer, playerMesh;
+        let keys = { w: false, a: false, s: false, d: false, arrowup: false, arrowdown: false, arrowleft: false, arrowright: false };
+        let botAIList = [];
+
+        function launchGame() {
+            document.getElementById('game-container').style.display = 'block';
+            gameActive = true;
+            init3D();
+            initBotChatAI();
+        }
+
+        function exitGame() {
+            document.getElementById('game-container').style.display = 'none';
+            gameActive = false;
+            if (renderer) renderer.dispose();
+        }
+
+        function init3D() {
+            const canvas = document.getElementById('game-canvas');
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x1a1a2e);
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(10, 20, 10);
+            scene.add(dirLight);
+
+            // Map Creation for "Hunt and Slice 2" (Designed by nikiibeanz)
+            // Floor
+            const floorGeo = new THREE.PlaneGeometry(100, 100);
+            const floorMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.8 });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            scene.add(floor);
+
+            // Obstacle Blocks (MM2 Style layout)
+            const boxGeo = new THREE.BoxGeometry(4, 4, 4);
+            const boxMat = new THREE.MeshStandardMaterial({ color: 0x5555ff });
+            for (let i = 0; i < 15; i++) {
+                const obstacle = new THREE.Mesh(boxGeo, boxMat);
+                obstacle.position.x = (Math.random() - 0.5) * 60;
+                obstacle.position.y = 2;
+                obstacle.position.z = (Math.random() - 0.5) * 60;
+                scene.add(obstacle);
+            }
+
+            // Player Avatar block
+            const playerGeo = new THREE.BoxGeometry(2, 3, 1);
+            const playerMat = new THREE.MeshStandardMaterial({ color: 0xff3333 });
+            playerMesh = new THREE.Mesh(playerGeo, playerMat);
+            playerMesh.position.y = 1.5;
+            scene.add(playerMesh);
+
+            camera.position.set(0, 8, 12);
+            camera.lookAt(playerMesh.position);
+
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('keyup', handleKeyUp);
+
+            animateGame();
+        }
+
+        function handleKeyDown(e) {
+            if (!gameActive) return;
+            const k = e.key.toLowerCase();
+            if (k === 'w' || e.code === 'ArrowUp') keys.w = true;
+            if (k === 's' || e.code === 'ArrowDown') keys.s = true;
+            if (k === 'a' || e.code === 'ArrowLeft') keys.a = true;
+            if (k === 'd' || e.code === 'ArrowRight') keys.d = true;
+        }
+
+        function handleKeyUp(e) {
+            if (!gameActive) return;
+            const k = e.key.toLowerCase();
+            if (k === 'w' || e.code === 'ArrowUp') keys.w = false;
+            if (k === 's' || e.code === 'ArrowDown') keys.s = false;
+            if (k === 'a' || e.code === 'ArrowLeft') keys.a = false;
+            if (k === 'd' || e.code === 'ArrowRight') keys.d = false;
+        }
+
+        function animateGame() {
+            if (!gameActive) return;
+            requestAnimationFrame(animateGame);
+
+            // Movement handling via WASD / Arrow Keys
+            const speed = 0.2;
+            if (keys.w) playerMesh.position.z -= speed;
+            if (keys.s) playerMesh.position.z += speed;
+            if (keys.a) playerMesh.position.x -= speed;
+            if (keys.d) playerMesh.position.x += speed;
+
+            // Camera follow
+            camera.position.x = playerMesh.position.x;
+            camera.position.z = playerMesh.position.z + 10;
+            camera.lookAt(playerMesh.position);
+
+            renderer.render(scene, camera);
+        }
+
+        // --- AI Chat Simulation inside servers ---
+        const botResponses = [
+            "Anyone trading items?",
+            "Bro, nikiibeanz cooked with this map update!",
+            "Hide and seek starting in the main arena soon.",
+            "Watch out, the murderer is roaming around!",
+            "GG everyone, nice round."
+        ];
+
+        function initBotChatAI() {
+            const chatBox = document.getElementById('chat-messages');
+            chatBox.innerHTML = `<div style="color: #00ffcc;">[System]: Connected to Hunt and Slice 2 server (Map by nikiibeanz).</div>`;
+            
+            // Periodic AI bot dialogue injection
+            window.botChatInterval = setInterval(() => {
+                if (!gameActive) return;
+                const randomBot = fakeDevs[Math.floor(Math.random() * fakeDevs.length)].name;
+                const randomMsg = botResponses[Math.floor(Math.random() * botResponses.length)];
+                appendChat(randomBot, randomMsg);
+            }, 6000);
+        }
+
+        function appendChat(sender, message) {
+            const chatBox = document.getElementById('chat-messages');
+            chatBox.innerHTML += `<div><b>${sender}:</b> ${message}</div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleChatInput(e) {
+            if (e.key === 'Enter') {
+                sendPlayerChat();
+            }
+        }
+
+        function sendPlayerChat() {
+            const input = document.getElementById('chat-input');
+            const val = input.value.trim();
+            if (val) {
+                appendChat(playerData.displayName, val);
+                input.value = '';
+                
+                // Simulate basic automated AI conversational reply
+                setTimeout(() => {
+                    const replyingBot = fakeDevs[Math.floor(Math.random() * fakeDevs.length)].name;
+                    appendChat(replyingBot, `Haha yeah, totally agree ${playerData.displayName}!`);
+                }, 1500);
+            }
+        }
+
+        // Initialize App states on load
+        updateUI();
+        initShop();
+        initTrading();
+    </script>
+</body>
+</html>
